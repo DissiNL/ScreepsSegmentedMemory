@@ -62,7 +62,7 @@ An example of the layout would be
     Allies: "Nothing here"
 }
 ```
-##2 Information about *bookKeeping*
+##3 Information about *bookKeeping*
 
 ####**Why is this needed?**
 
