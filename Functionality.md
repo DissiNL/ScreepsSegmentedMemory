@@ -7,7 +7,7 @@ ScreepsSegmentedMemory functions:
 >  `SegMemory.unsetCrucial(<segmentName>)`
 >  `SegMemory.setMaxCrucialSegments(<number>)`
 >  `SegMemory.getMaxCrucialSegments()`
->  `SegMemory.requestActive(<segmentName>)`
+>  `SegMemory.setActive(<segmentName>)`
 >  `SegMemory.setInActive(<segmentName>)`
 >  `SegMemory.isActive(<segmentName>)`
 >  `SegMemory.markDirty(<segmentName>)`
@@ -50,9 +50,9 @@ Gets the amount of segments you've configured to use for crucial memory segments
 Returns:
  - Amount of segments
 
-###  **`SegMemory.requestActive(<segmentName>)` **
+###  **`SegMemory.setActive(<segmentName>)` **
 
-Requests a segment to be activated for next few ticks
+Sets a segment to be activated for next few ticks
 
 Returns:
  - `SegMemory.OK` on OK - Queues, next tick it will be active

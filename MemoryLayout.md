@@ -23,11 +23,13 @@ The config module has the following memory content:
     // Maximum amount of segments reserved to be loaded every tick.
     maxCrucial: <number, default 5>, 
     // Names of crucial segments
-    crucialSegment: [{name1}, {name2}] 
+    crucialSegment: [{name1}, {name2}],
+    // Names of other activated segments
+    activeSegments: [{name1}, {name2}],
+    // Names of segments that will be activated when there's time left, to store dirty data.
+    dirtySegments: [{name1}, {name2}],
 }
 ```
-
-
 
   
 ##2. Information about ***data***
@@ -40,17 +42,14 @@ The `data` contains information which segment of `RawMemory.segments` is related
 The data structure it holds is as follows:
 ```javascript
 {
-    {segmentName}:  { 
-                        crucial: <boolean>,
-                        segs: [segment ID array], // Max amount of segments is defined by maxCrucial configuration
-                    }; 
+    {segmentName}:  [segment ID array], // Max amount of segments is defined by maxCrucial configuration
 }
 ```
 An example of the layout would be
 
 ```javascript
 {
-    Crucial: {[3,9]},
+    Crucial: [3,9], // Order doesn't need to be aligned
     Paths: [0,1,2],
     Matrixes: [4,5],
     Allies: [7,8]
