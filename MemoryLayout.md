@@ -5,12 +5,32 @@ Memory contents are located in:
     Memory.rawMemSegmentData
     
 Sub objects are:
- 1. data
- 2. dirty
- 3. bookKeeping
+ 1. config
+ 2. data
+ 3. dirty
+ 4. bookKeeping
 
   
-##1. Information about ***data***
+##1. Information about ***config***
+####**Why is this needed?**
+
+The segment module can be configured to various things in various ways. The config data is set to let it operate in certain ways.
+
+####**What does it contain?**
+The config module has the following memory content:
+```javascript
+{
+    // Maximum amount of segments reserved to be loaded every tick.
+    maxCrucial: <number, default 5>, 
+    // Names of crucial segments
+    crucialSegment: [{name1}, {name2}] 
+}
+```
+
+
+
+  
+##2. Information about ***data***
 ####**Why is this needed?**
 Segments can get bigger than 100 KB, which means they might have to be split up. We want to abstract this away and only keep references to where the data is located to reconstruct the data at a later time.
 ####**What does it contain?**
@@ -20,14 +40,18 @@ The `data` contains information which segment of `RawMemory.segments` is related
 The data structure it holds is as follows:
 ```javascript
 {
-    {segmentName}: [segment ID array] // 0 to max 5 segments
+    {segmentName}:  { 
+                        crucial: <boolean>,
+                        segs: [segment ID array], // Max amount of segments is defined by maxCrucial configuration
+                    }; 
 }
 ```
 An example of the layout would be
 
 ```javascript
 {
-    PromotedPaths: [0,1,2],
+    Crucial: {[3,9]},
+    Paths: [0,1,2],
     Matrixes: [4,5],
     Allies: [7,8]
 }
@@ -35,7 +59,7 @@ An example of the layout would be
 Requesting a memory segment with a name will result in the engine reserving **X ** amount of segments to load for next tick.
 
 
-##2 Information about ***dirty***
+##3 Information about ***dirty***
 
 ####**Why is this needed?**
 
@@ -62,7 +86,7 @@ An example of the layout would be
     Allies: "Nothing here"
 }
 ```
-##3 Information about *bookKeeping*
+##4 Information about *bookKeeping*
 
 ####**Why is this needed?**
 
