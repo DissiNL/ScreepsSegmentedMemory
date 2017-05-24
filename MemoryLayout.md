@@ -2,7 +2,7 @@
 
 Memory contents are located in:
 
-    Memory.rawMemSegmentData
+    Memory.__rawMemSegmentData
     
 Sub objects are:
  1. config
@@ -67,7 +67,7 @@ This object is needed to store information before it's pushed to the segments. T
 ####**What does it contain?**
 
 
-The `dirty` entry in `Memory.rawMemSegmentData` holds raw memory contents which hasn't been persisted yet due to the segments not being loaded.
+The `dirty` entry in `Memory.__rawMemSegmentData` holds raw memory contents which hasn't been persisted yet due to the segments not being loaded.
 
 The data structure it holds is as follows:
 ```javascript
@@ -93,7 +93,7 @@ Different versions of different segments can be loaded on nodes at runtime. This
 
 ####**What does it contain?**
 
-The `bookKeeping` entry in `Memory.rawMemSegmentData` holds versioning information about the segment.
+The `bookKeeping` entry in `Memory.__rawMemSegmentData` holds versioning information about the segment.
 
 The data structure it holds is as follows:
 ```javascript
