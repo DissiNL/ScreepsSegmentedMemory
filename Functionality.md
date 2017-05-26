@@ -3,17 +3,17 @@
 ScreepsSegmentedMemory functions:
 
  
->  `SegMemory.setCrucial(<segmentName>)`
->  `SegMemory.unsetCrucial(<segmentName>)`
->  `SegMemory.setMaxCrucialSegments(<number>)`
->  `SegMemory.getMaxCrucialSegments()`
->  `SegMemory.setActive(<segmentName>)`
->  `SegMemory.setInActive(<segmentName>)`
->  `SegMemory.isActive(<segmentName>)`
->  `SegMemory.markDirty(<segmentName>)`
->  `SegMemory.storeSegment(<segmentName>,<Object>)`
->  `SegMemory.getSegment(<segmentName>)`
->  `SegMemory.getSegmentVersion(<segmentName>)`
+>  `SegMemory.setCrucial(<segmentName>)`  
+>  `SegMemory.unsetCrucial(<segmentName>)`  
+>  `SegMemory.setMaxCrucialSegments(<number>)`  
+>  `SegMemory.getMaxCrucialSegments()`  
+>  `SegMemory.setActive(<segmentName>)`  
+>  `SegMemory.setInActive(<segmentName>)`  
+>  `SegMemory.isActive(<segmentName>)`  
+>  `SegMemory.markDirty(<segmentName>)`  
+>  `SegMemory.storeSegment(<segmentName>,<Object>)`  
+>  `SegMemory.getSegment(<segmentName>)`  
+>  `SegMemory.getSegmentVersion(<segmentName>)`  
 
 
 ###  **`SegMemory.setCrucial(<segmentName>)`**
@@ -30,7 +30,7 @@ Returns:
 
 
 ###  **`SegMemory.unsetCrucial(<segmentName>, <boolean saveAsNormalSegment>)` **
-Unsets a segment as important, when `saveAsNormalSegment` is set to true it will re-save it as 
+Unsets a segment as important, when `saveAsNormalSegment` is set to true it will re-save it as a normal segment
 
 
 ###  **`SegMemory.setMaxCrucialSegments(<number>)` **

@@ -1,4 +1,4 @@
-#ScreepsSegmentedMemory memory layouts
+#ScreepsSegmentedMemory memory layouts#
 
 Memory contents are located in:
 
@@ -11,12 +11,12 @@ Sub objects are:
  4. bookKeeping
 
   
-##1. Information about ***config***
-####**Why is this needed?**
+##1. Information about ***config***##
+####**Why is this needed?**####
 
 The segment module can be configured to various things in various ways. The config data is set to let it operate in certain ways.
 
-####**What does it contain?**
+####**What does it contain?**####
 The config module has the following memory content:
 ```javascript
 {
@@ -32,10 +32,10 @@ The config module has the following memory content:
 ```
 
   
-##2. Information about ***data***
-####**Why is this needed?**
+##2. Information about ***data***##
+####**Why is this needed?**####
 Segments can get bigger than 100 KB, which means they might have to be split up. We want to abstract this away and only keep references to where the data is located to reconstruct the data at a later time.
-####**What does it contain?**
+####**What does it contain?**####
 
 The `data` contains information which segment of `RawMemory.segments` is related to what data. 
 
@@ -58,13 +58,13 @@ An example of the layout would be
 Requesting a memory segment with a name will result in the engine reserving **X ** amount of segments to load for next tick.
 
 
-##3 Information about ***dirty***
+##3 Information about ***dirty***##
 
-####**Why is this needed?**
+####**Why is this needed?**####
 
 This object is needed to store information before it's pushed to the segments. The pieces of data are deleted once the segment has been written. 
 
-####**What does it contain?**
+####**What does it contain?**####
 
 
 The `dirty` entry in `Memory.__rawMemSegmentData` holds raw memory contents which hasn't been persisted yet due to the segments not being loaded.
@@ -85,13 +85,13 @@ An example of the layout would be
     Allies: "Nothing here"
 }
 ```
-##4 Information about *bookKeeping*
+##4 Information about *bookKeeping*##
 
-####**Why is this needed?**
+####**Why is this needed?**####
 
 Different versions of different segments can be loaded on nodes at runtime. This versioning information is stored on global, and in memory. If there is a mismatch the data should be reloaded. If data is stored to the segments the version number here is altered to a new ID.
 
-####**What does it contain?**
+####**What does it contain?**####
 
 The `bookKeeping` entry in `Memory.__rawMemSegmentData` holds versioning information about the segment.
 
