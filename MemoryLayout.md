@@ -11,9 +11,12 @@ Sub objects are:
  3. dirty
  4. bookKeeping
 
-  
+
+
+
 1. Information about ***config***
 --
+
 **Why is this needed?**
 ==
 
@@ -39,9 +42,12 @@ The config module has the following memory content:
   
 2. Information about ***data***
 --
+
 **Why is this needed?**
 ==
+
 Segments can get bigger than 100 KB, which means they might have to be split up. We want to abstract this away and only keep references to where the data is located to reconstruct the data at a later time.
+
 **What does it contain?**
 ==
 
