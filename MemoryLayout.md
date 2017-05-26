@@ -14,7 +14,7 @@ Sub objects are:
 
 
 
-1. Information about ***config***
+1 Information about ***config***
 --
 
 **Why is this needed?**
@@ -40,7 +40,7 @@ The config module has the following memory content:
 ```
 
   
-2. Information about ***data***
+2 Information about ***data***
 --
 
 **Why is this needed?**
