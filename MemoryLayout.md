@@ -14,7 +14,7 @@ Sub objects are:
 
 
 
-1. Information about ***config***
+1 Information about ***config***
 --
 
 **Why is this needed?**
@@ -31,16 +31,16 @@ The config module has the following memory content:
     // Maximum amount of segments reserved to be loaded every tick.
     maxCrucial: <number, default 5>, 
     // Names of crucial segments
-    crucialSegment: [{name1}, {name2}],
+    crucialSegment: { name1:{}, name2:{} },
     // Names of other activated segments
-    activeSegments: [{name1}, {name2}],
+    activeSegments: { name1:{}, name2:{} },
     // Names of segments that will be activated when there's time left, to store dirty data.
-    dirtySegments: [{name1}, {name2}],
+    dirtySegments: { name1:{}, name2: {} },
 }
 ```
 
   
-2. Information about ***data***
+2 Information about ***data***
 --
 
 **Why is this needed?**
