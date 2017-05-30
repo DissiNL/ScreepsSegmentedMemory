@@ -38,6 +38,7 @@ var segMem = class SegMemory {
         }
         return Memory.__rawMemSegmentData.data;
     }
+    
     static getBookKeeping() {
         if (!Memory.__rawMemSegmentData.bookKeeping) {
             Memory.__rawMemSegmentData.bookKeeping = {};
@@ -45,12 +46,14 @@ var segMem = class SegMemory {
         return Memory.__rawMemSegmentData.bookKeeping;
 
     }
+
     static getConfig() {
         if (!Memory.__rawMemSegmentData.config) {
             Memory.__rawMemSegmentData.config = {};
         }
         return Memory.__rawMemSegmentData.config;
     }
+
     static getConfigByIndexKey(theKey) {
         var config = this.getConfig();
         if (config[theKey]) {
@@ -70,6 +73,7 @@ var segMem = class SegMemory {
     static getEndMemoryIndex() {
         return this.getConfigByIndexKey("endIndex");
     }
+
     static getMaxCrucialSegments() {
         return this.getConfigByIndexKey("maxCrucial");
     }
@@ -120,7 +124,6 @@ var segMem = class SegMemory {
                 nextEnabled.push(toAdd[i]);
             }
         }
-
 
         this.storeDirtyMemory(nextEnabled);
         return nextEnabled;
@@ -224,12 +227,12 @@ var segMem = class SegMemory {
             this.initializeSegment(theSegmentName);
         }
         if (this.isCrucialSegment(theSegmentName)) {
-            console.log("Can't store crucial segments yet!");
-            // TODO fix
+            SEGMEMORY_INTER_TICK_GLOBAL.crucialData[theSegmentName] = theData;
+            this.storeSegment(SegMemory.CRUCIAL_SEGMENT_NAME, SEGMEMORY_INTER_TICK_GLOBAL.crucialData);
             return;
         }
 
-        console.log("Storing new segment with name " + theSegmentName);
+        console.log("Updating segment with name " + theSegmentName);
 
         // Generate data we need to store
         var dataToStore;
@@ -304,7 +307,6 @@ var segMem = class SegMemory {
         while (segments.length > theNeededSegmentCount) {
             segments.pop();
         }
-
     }
 
     static buildSegmentUsageIndex() {
@@ -347,7 +349,6 @@ var segMem = class SegMemory {
             s: []
         };
     }
-
 
     static getSegment(theSegmentName) {
         if (this.validateGLobalCacheForSegment(theSegmentName)) {
@@ -415,11 +416,14 @@ var segMem = class SegMemory {
     }
 
     static setCrucial(theSegmentName) {
-        if (this.getSegmentVersion(theSegmentName) === SegMemory.ERR_INVALID_ARGS) {
+        if (theSegmentName == SegMemory.CRUCIAL_SEGMENT_NAME || this.getSegmentVersion(theSegmentName) === SegMemory.ERR_INVALID_ARGS) {
             return SegMemory.ERR_INVALID_ARGS;
         }
         if (this.isCrucialSegment(theSegmentName)) {
             return SegMemory.OK;
+        }
+        if(!this.areAllMemorySegmentsActive(theSegmentName)){
+            return SegMemory.ERR_NOT_ACTIVE;
         }
 
         var dataToPort = this.getSegment(theSegmentName);
@@ -431,13 +435,48 @@ var segMem = class SegMemory {
         SEGMEMORY_INTER_TICK_GLOBAL.crucialData[theSegmentName] = dataToPort;
 
         delete this.getSegmentObjectFromRegistry(theSegmentName).s;
+        delete this.getSegmentDataRegister()[theSegmentName];
+
         delete this.getActiveSegments()[theSegmentName];
         this.getCrucialSegments()[theSegmentName] = true;
         this.storeSegment(SegMemory.CRUCIAL_SEGMENT_NAME, SEGMEMORY_INTER_TICK_GLOBAL.crucialData);
+
+        return SegMemory.OK;
     }
 
-    static unsetCrucial(theSegmentName, saveAsNormalSegment) {
+    static unsetCrucial(theSegmentName, theJustDeleteTheDataFlag) {
+        if (theSegmentName == SegMemory.CRUCIAL_SEGMENT_NAME || this.getSegmentVersion(theSegmentName) === SegMemory.ERR_INVALID_ARGS) {
+            return SegMemory.ERR_INVALID_ARGS;
+        }
+        if (!this.isCrucialSegment(theSegmentName)) {
+            return SegMemory.ERR_INVALID_ARGS;
+        }
 
+        if(theJustDeleteTheDataFlag){
+            delete SEGMEMORY_INTER_TICK_GLOBAL.crucialData[theSegmentName];
+            this.storeSegment(SegMemory.CRUCIAL_SEGMENT_NAME, SEGMEMORY_INTER_TICK_GLOBAL.crucialData);
+            return SegMemory.OK;
+        }
+
+        var dataToSave = this.getSegment(theSegmentName)
+        
+        this.deleteSegment(theSegmentName);
+        this.storeSegment(SegMemory.CRUCIAL_SEGMENT_NAME, SEGMEMORY_INTER_TICK_GLOBAL.crucialData);
+        return this.storeSegment(theSegmentName, dataToSave);
+    }
+
+    static deleteSegment(theSegmentName){
+        if (theSegmentName == SegMemory.CRUCIAL_SEGMENT_NAME || this.getSegmentVersion(theSegmentName) === SegMemory.ERR_INVALID_ARGS) {
+            return SegMemory.ERR_INVALID_ARGS;
+        }
+        if (this.isCrucialSegment(theSegmentName)) {
+            this.unsetCrucial(theSegmentName, true);
+        }
+        delete this.getSegmentDataRegister()[theSegmentName];
+        delete this.getActiveSegments()[theSegmentName];
+        delete this.getCrucialSegments()[theSegmentName];
+        delete this.getBookKeeping()[theSegmentName];
+        return SegMemory.OK;
     }
 
     static setActive(theSegmentName) {
@@ -445,6 +484,9 @@ var segMem = class SegMemory {
             return SegMemory.ERR_INVALID_ARGS;
         }
         if (this.getActiveSegments()[theSegmentName]) {
+            return SegMemory.OK;
+        }
+        if (this.isCrucialSegment(theSegmentName)) {
             return SegMemory.OK;
         }
 
@@ -455,6 +497,7 @@ var segMem = class SegMemory {
         this.getActiveSegments()[theSegmentName] = true;
         return SegMemory.OK;
     }
+
     static setInActive(theSegmentName) {
         if (this.getSegmentVersion(theSegmentName) === SegMemory.ERR_INVALID_ARGS) {
             return SegMemory.ERR_INVALID_ARGS;
@@ -462,6 +505,7 @@ var segMem = class SegMemory {
         delete this.getActiveSegments()[theSegmentName];
         return SegMemory.OK;
     }
+
     static getActiveTotalSegments() {
         var activeSegments = Object.keys(this.getActiveSegments());
         var totalActiveSegmentsCounter = 0;
@@ -472,7 +516,6 @@ var segMem = class SegMemory {
         totalActiveSegmentsCounter += this.getSegmentIndexesFromRegistry(SegMemory.CRUCIAL_SEGMENT_NAME).length
         return totalActiveSegmentsCounter;
     }
-
 }
 
 module.exports = segMem;
