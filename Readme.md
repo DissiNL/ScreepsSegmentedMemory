@@ -12,8 +12,17 @@ You can use it as follows:
 // Every tick:
 SegMemory.init();
 // ~your code until the end of the tick
-var toEnable = SegMemory.endTick(); // Creates a list of segments that should be active
-RawMemory.setActiveSegments(toEnable);
+var toEnable = SegMemory.endTick(); 
+var activeSegments = SegMemory.endTick();// Creates a list of segments that should be active/set
+if(activeSegments.rawMemorySegmentData){
+    for(var data in RawMemory.segments){
+        delete RawMemory.segments[data];
+    }
+    for(var data in activeSegments.rawMemorySegmentData){
+        RawMemory.segments[data] = activeSegments.rawMemorySegmentData[data];
+    }
+}
+RawMemory.setActiveSegments(activeSegments.nextEnabled);
 // ===========================
 
 // ================ Example code tick 1:
