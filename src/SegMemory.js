@@ -1,4 +1,4 @@
-var SEGMEMORY_INTER_TICK_GLOBAL = {};
+global.SEGMEMORY_INTER_TICK_GLOBAL = {};
 SEGMEMORY_INTER_TICK_GLOBAL.loadedDataCache = {};
 SEGMEMORY_INTER_TICK_GLOBAL.crucialData = {};
 
@@ -38,7 +38,7 @@ var segMem = class SegMemory {
         }
         return Memory.__rawMemSegmentData.data;
     }
-    
+
     static getBookKeeping() {
         if (!Memory.__rawMemSegmentData.bookKeeping) {
             Memory.__rawMemSegmentData.bookKeeping = {};
@@ -124,33 +124,29 @@ var segMem = class SegMemory {
                 nextEnabled.push(toAdd[i]);
             }
         }
+        var toSaveInSegMem = this.storeDirtyMemory();
 
-        this.storeDirtyMemory(nextEnabled);
-        return nextEnabled;
+        return {
+            nextEnabled: nextEnabled,
+            rawMemorySegmentData: toSaveInSegMem
+        };
     }
 
-    static storeDirtyMemory(nextEnabled) {
+    static storeDirtyMemory() {
+        var segmentDataResult = {};
         var dirtySegmentObject = this.getDirtySegments();
         var dirtySegments = Object.keys(dirtySegmentObject);
         if (dirtySegments.length == 0) {
             return;
         }
         var maxUsable = this.getUsableSegments();
-        var toBeUsedDuringStorage = maxUsable - nextEnabled.length;
+        var toBeUsedDuringStorage = maxUsable;
 
         for (var segmentName in dirtySegments) {
             var toSave = dirtySegments[segmentName];
             var dataLocations = this.getSegmentObjectFromRegistry(toSave);
             var splitData = dataLocations.dirty;
-            if (!splitData) {
-                delete dirtySegmentObject[toSave];
-            }
             var neededFreeSpaces = splitData.length;
-            for (var dataLocation in dataLocations.s) {
-                if (_.contains(nextEnabled, dataLocations.s[dataLocation])) {
-                    neededFreeSpaces--;
-                }
-            }
 
             if (neededFreeSpaces > toBeUsedDuringStorage) {
                 continue;
@@ -158,12 +154,13 @@ var segMem = class SegMemory {
 
             toBeUsedDuringStorage -= neededFreeSpaces;
             for (var i = 0; i < splitData.length; i++) {
-                RawMemory.segments[dataLocations.s[i]] = splitData[i];
+                segmentDataResult[new Number(dataLocations.s[i])] = splitData[i];
             }
             console.log("Saved new version of " + toSave);
             delete dataLocations.dirty;
             delete dirtySegmentObject[toSave];
         }
+        return segmentDataResult;
     }
 
     static splitToSegmentSizedData(theData) {
@@ -195,7 +192,7 @@ var segMem = class SegMemory {
                 };
                 console.log("Cache miss on crucial data! " + version);
             } catch (error) {
-                console.log("Memory got corrupted: " + this.getCombinedDataFromRegistery(SegMemory.CRUCIAL_SEGMENT_NAME));
+                console.log("Memory [" + this.getSegmentIndexesFromRegistry(SegMemory.CRUCIAL_SEGMENT_NAME) + "] got corrupted: " + error);
             }
         }
     }
@@ -227,6 +224,7 @@ var segMem = class SegMemory {
             this.initializeSegment(theSegmentName);
         }
         if (this.isCrucialSegment(theSegmentName)) {
+            console.log("Update on crucial! Should be sporadic.. [" + theSegmentName + "]");
             SEGMEMORY_INTER_TICK_GLOBAL.crucialData[theSegmentName] = theData;
             this.storeSegment(SegMemory.CRUCIAL_SEGMENT_NAME, SEGMEMORY_INTER_TICK_GLOBAL.crucialData);
             return;
@@ -351,6 +349,10 @@ var segMem = class SegMemory {
     }
 
     static getSegment(theSegmentName) {
+        if (this.isCrucialSegment(theSegmentName)) {
+            return SEGMEMORY_INTER_TICK_GLOBAL.crucialData[theSegmentName];
+        }
+
         if (this.validateGLobalCacheForSegment(theSegmentName)) {
             return SEGMEMORY_INTER_TICK_GLOBAL.loadedDataCache[theSegmentName].data;
         }
@@ -360,10 +362,10 @@ var segMem = class SegMemory {
             return SegMemory.ERR_INVALID_ARGS;
         }
         var segmentData;
-        if (this.isCrucialSegment(theSegmentName)) {
-            var segmentData = SEGMEMORY_INTER_TICK_GLOBAL.crucialData[theSegmentName];
-        } else if (this.areAllMemorySegmentsActive(theSegmentName)) {
+        if (this.areAllMemorySegmentsActive(theSegmentName)) {
             segmentData = this.getCombinedDataFromRegistery(theSegmentName);
+        } else {
+            return SegMemory.ERR_NOT_ACTIVE;
         }
 
         if (registerData.o) {
@@ -422,7 +424,7 @@ var segMem = class SegMemory {
         if (this.isCrucialSegment(theSegmentName)) {
             return SegMemory.OK;
         }
-        if(!this.areAllMemorySegmentsActive(theSegmentName)){
+        if (!this.areAllMemorySegmentsActive(theSegmentName)) {
             return SegMemory.ERR_NOT_ACTIVE;
         }
 
@@ -452,20 +454,20 @@ var segMem = class SegMemory {
             return SegMemory.ERR_INVALID_ARGS;
         }
 
-        if(theJustDeleteTheDataFlag){
+        if (theJustDeleteTheDataFlag) {
             delete SEGMEMORY_INTER_TICK_GLOBAL.crucialData[theSegmentName];
             this.storeSegment(SegMemory.CRUCIAL_SEGMENT_NAME, SEGMEMORY_INTER_TICK_GLOBAL.crucialData);
             return SegMemory.OK;
         }
 
         var dataToSave = this.getSegment(theSegmentName)
-        
+
         this.deleteSegment(theSegmentName);
         this.storeSegment(SegMemory.CRUCIAL_SEGMENT_NAME, SEGMEMORY_INTER_TICK_GLOBAL.crucialData);
         return this.storeSegment(theSegmentName, dataToSave);
     }
 
-    static deleteSegment(theSegmentName){
+    static deleteSegment(theSegmentName) {
         if (theSegmentName == SegMemory.CRUCIAL_SEGMENT_NAME || this.getSegmentVersion(theSegmentName) === SegMemory.ERR_INVALID_ARGS) {
             return SegMemory.ERR_INVALID_ARGS;
         }
