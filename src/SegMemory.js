@@ -10,7 +10,7 @@ var segMem = class SegMemory {
             maxCrucial: 5,
             usableSegments: 8, // leave 2 for other libraries to use
             startIndex: 10,
-            endIndex: 99
+            endIndex: 30
         };
     }
     static get CRUCIAL_SEGMENT_NAME() {
