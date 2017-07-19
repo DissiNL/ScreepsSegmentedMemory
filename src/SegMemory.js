@@ -156,7 +156,7 @@ var segMem = class SegMemory {
             for (var i = 0; i < splitData.length; i++) {
                 segmentDataResult[new Number(dataLocations.s[i])] = splitData[i];
             }
-            console.log("Saved new version of " + toSave);
+            
             delete dataLocations.dirty;
             delete dirtySegmentObject[toSave];
         }
@@ -190,7 +190,6 @@ var segMem = class SegMemory {
                 SEGMEMORY_INTER_TICK_GLOBAL.loadedDataCache[SegMemory.CRUCIAL_SEGMENT_NAME] = {
                     tick: this.getSegmentVersion(SegMemory.CRUCIAL_SEGMENT_NAME)
                 };
-                console.log("Cache miss on crucial data! " + version);
             } catch (error) {
                 console.log("Memory [" + this.getSegmentIndexesFromRegistry(SegMemory.CRUCIAL_SEGMENT_NAME) + "] got corrupted: " + error);
             }
@@ -224,13 +223,10 @@ var segMem = class SegMemory {
             this.initializeSegment(theSegmentName);
         }
         if (this.isCrucialSegment(theSegmentName)) {
-            console.log("Update on crucial! Should be sporadic.. [" + theSegmentName + "]");
             SEGMEMORY_INTER_TICK_GLOBAL.crucialData[theSegmentName] = theData;
             this.storeSegment(SegMemory.CRUCIAL_SEGMENT_NAME, SEGMEMORY_INTER_TICK_GLOBAL.crucialData);
             return;
         }
-
-        console.log("Updating segment with name " + theSegmentName);
 
         // Generate data we need to store
         var dataToStore;
@@ -245,7 +241,6 @@ var segMem = class SegMemory {
 
         var dataSegmentsNeeded = Math.max(1, Math.ceil(dataToStore.length / CONST_MEMORY_SEGMENT_MAX_SIZE));
         var segments = this.getSegmentIndexesFromRegistry(theSegmentName);
-        console.log("Needed:[" + dataSegmentsNeeded + "] current: [" + segments.length + "]");
 
         // Allocate or de-allocate segments
         if (segments.length < dataSegmentsNeeded) {
@@ -339,7 +334,6 @@ var segMem = class SegMemory {
     }
 
     static initializeSegment(theSegmentName) {
-        console.log("Initializing new segment with name " + theSegmentName);
         var bookKeeping = this.getBookKeeping();
         var segmentDataRegister = this.getSegmentDataRegister();
         bookKeeping[theSegmentName] = Game.time;
